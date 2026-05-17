@@ -6,84 +6,165 @@ import "../styles/Home.css";
 const POOL = [
   1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
   16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,
+  31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,
+  46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,
 ];
+
+const VISIBLE_COUNT  = 20;
+const SHUFFLED_POOL  = [...POOL].sort(() => 0.5 - Math.random());
 
 const rand    = (min, max) => Math.random() * (max - min) + min;
 const randInt = (min, max) => Math.floor(rand(min, max));
+const randVel = () => (Math.random() < 0.5 ? 1 : -1) * rand(0.04, 0.1);
 
 const Home = () => {
-  const [characters, setCharacters]               = useState([]);
-  const [positions, setPositions]                 = useState([]);
+  const [allChars, setAllChars]                   = useState({});
+  const [slots, setSlots]                         = useState([]);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
+  const [hoveredId, setHoveredId]                 = useState(null);
   const [cursorPos, setCursorPos]                 = useState({ x: -200, y: -200 });
   const [cursorVisible, setCursorVisible]         = useState(false);
   const [smokeParticles, setSmokeParticles]       = useState([]);
+
   const smokeId   = useRef(0);
   const lastSmoke = useRef(0);
-  const navigate  = useNavigate();
   const animRefs  = useRef([]);
+  const posRef    = useRef([]);
+  const rafId     = useRef(null);
+  const poolIndex = useRef(0);
+  const poolQueue = useRef(SHUFFLED_POOL);
+  const navigate  = useNavigate();
+
+  const nextCharId = () => {
+    const id = poolQueue.current[poolIndex.current % poolQueue.current.length];
+    poolIndex.current++;
+    return id;
+  };
+
+  const makePos = (slotId) => ({
+    slotId,
+    charId:  nextCharId(),
+    x:       rand(2, 90),
+    y:       rand(5, 88),
+    vx:      randVel(),
+    vy:      randVel(),
+    size:    randInt(50, 78),
+    opacity: 1,
+    fading:  false,
+  });
 
   // Cargar personajes
   useEffect(() => {
     const fetchAll = async () => {
       const res  = await fetch(`https://rickandmortyapi.com/api/character/${POOL.join(",")}`);
       const data = await res.json();
-      setCharacters(data);
+      const map  = {};
+      data.forEach((c) => (map[c.id] = c));
+      setAllChars(map);
 
-      // Posición y velocidad inicial aleatoria para cada personaje
-      const generated = data.map(() => ({
-        x:    rand(3, 90),   // % del ancho
-        y:    rand(5, 88),   // % del alto
-        vx:   (Math.random() < 0.5 ? 1 : -1) * rand(0.03, 0.09),
-        vy:   (Math.random() < 0.5 ? 1 : -1) * rand(0.03, 0.09),
-        size: randInt(50, 78),
-      }));
-      setPositions(generated);
+      const initial = Array.from({ length: VISIBLE_COUNT }, (_, i) => makePos(i));
+      posRef.current = initial;
+
+      setSlots(initial.map((s) => ({
+        slotId: s.slotId,
+        charId: s.charId,
+        size:   s.size,
+        initX:  s.x,
+        initY:  s.y,
+      })));
     };
     fetchAll();
   }, []);
 
-  // Animación de burbuja con requestAnimationFrame
+  // RAF
   useEffect(() => {
-    if (positions.length === 0) return;
-
-    let current = positions.map((p) => ({ ...p }));
-    let rafId;
+    if (posRef.current.length === 0) return;
 
     const animate = () => {
-      current = current.map((p) => {
+      posRef.current = posRef.current.map((p) => {
+        if (p.fading) return p;
         let { x, y, vx, vy, size } = p;
         x += vx;
         y += vy;
-
-        // Rebotar en los bordes
-        const maxX = 95 - (size / window.innerWidth) * 100;
-        const maxY = 93 - (size / window.innerHeight) * 100;
-
+        const maxX = 94 - (size / window.innerWidth)  * 100;
+        const maxY = 92 - (size / window.innerHeight) * 100;
         if (x <= 1 || x >= maxX) vx = -vx;
         if (y <= 1 || y >= maxY) vy = -vy;
-
         x = Math.max(1, Math.min(x, maxX));
         y = Math.max(1, Math.min(y, maxY));
-
         return { ...p, x, y, vx, vy };
       });
 
-      // Actualizar DOM directo para máximo rendimiento
-      current.forEach((p, i) => {
+      posRef.current.forEach((p, i) => {
         const el = animRefs.current[i];
         if (el) {
-          el.style.left = `${p.x}%`;
-          el.style.top  = `${p.y}%`;
+          el.style.left    = `${p.x}%`;
+          el.style.top     = `${p.y}%`;
+          el.style.opacity = p.opacity;
         }
       });
 
-      rafId = requestAnimationFrame(animate);
+      rafId.current = requestAnimationFrame(animate);
     };
 
-    rafId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafId);
-  }, [positions.length]);
+    rafId.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId.current);
+  }, [slots.length]);
+
+  // Rotar personajes cada 4s
+  useEffect(() => {
+    if (Object.keys(allChars).length === 0) return;
+
+    const interval = setInterval(() => {
+      const idx = posRef.current.findIndex(
+        (p) => !p.fading &&
+               p.charId !== selectedCharacter?.id &&
+               p.charId !== hoveredId
+      );
+      if (idx === -1) return;
+
+      posRef.current[idx] = { ...posRef.current[idx], fading: true };
+
+      let opacity = 1;
+      const fadeOut = setInterval(() => {
+        opacity -= 0.05;
+        posRef.current[idx] = { ...posRef.current[idx], opacity: Math.max(0, opacity) };
+        if (opacity <= 0) {
+          clearInterval(fadeOut);
+          const newCharId = nextCharId();
+          const newSize   = randInt(50, 78);
+          posRef.current[idx] = {
+            ...posRef.current[idx],
+            charId:  newCharId,
+            x:       rand(2, 90),
+            y:       rand(5, 88),
+            vx:      randVel(),
+            vy:      randVel(),
+            size:    newSize,
+            opacity: 0,
+            fading:  false,
+          };
+          let opIn = 0;
+          const fadeIn = setInterval(() => {
+            opIn += 0.05;
+            posRef.current[idx] = { ...posRef.current[idx], opacity: Math.min(1, opIn) };
+            if (opIn >= 1) {
+              clearInterval(fadeIn);
+              setSlots((prev) =>
+                prev.map((s) =>
+                  s.slotId === idx
+                    ? { ...s, charId: newCharId, size: newSize }
+                    : s
+                )
+              );
+            }
+          }, 30);
+        }
+      }, 30);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [allChars, selectedCharacter, hoveredId]);
 
   // Cursor cohete
   const handleMouseMove = useCallback((e) => {
@@ -104,32 +185,24 @@ const Home = () => {
     ]);
   }, []);
 
-  const handleMouseEnter = () => setCursorVisible(true);
-  const handleMouseLeave = () => {
-    setCursorVisible(false);
-    setSmokeParticles([]);
-  };
-
   return (
     <div
       className="home-hero"
       onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => setCursorVisible(true)}
+      onMouseLeave={() => { setCursorVisible(false); setSmokeParticles([]); }}
     >
       <div className="stars" />
       <div className="stars2" />
       <div className="stars3" />
 
-      {/* Cursor cohete — desaparece con modal abierto */}
-      {cursorVisible && !selectedCharacter && (
+      {cursorVisible && (
         <div className="rocket-cursor" style={{ left: cursorPos.x, top: cursorPos.y }}>
           🚀
         </div>
       )}
 
-      {/* Rastro humo — desaparece con modal abierto */}
-      {cursorVisible && !selectedCharacter && smokeParticles.map((p) => (
+      {cursorVisible && smokeParticles.map((p) => (
         <div
           key={p.id}
           className="smoke-particle"
@@ -137,34 +210,31 @@ const Home = () => {
         />
       ))}
 
-      {/* Título */}
       <div className="hero-text">
         <h1 className="hero-title" onClick={() => navigate("/characters")}>
           Rick & Morty
         </h1>
       </div>
 
-      {/* Personajes flotando como burbujas */}
-      {characters.map((char, i) => {
-        const pos = positions[i];
-        if (!pos) return null;
+      {slots.map((slot, i) => {
+        const char      = allChars[slot.charId];
+        if (!char) return null;
+        const isHovered = hoveredId === char.id;
         return (
           <div
-            key={char.id}
-            ref={(el) => (animRefs.current[i] = el)}
-            className="floating-wrapper"
-            style={{
-              left:     `${pos.x}%`,
-              top:      `${pos.y}%`,
-              position: "absolute",
-            }}
+            key={slot.slotId}
+            ref={(el) => { animRefs.current[i] = el; }}
+            className={`floating-wrapper ${isHovered ? "is-hovered" : ""}`}
+            style={{ left: `${slot.initX}%`, top: `${slot.initY}%` }}
+            onMouseEnter={() => setHoveredId(char.id)}
+            onMouseLeave={() => setHoveredId(null)}
             onClick={() => setSelectedCharacter(char)}
           >
             <img
               src={char.image}
               alt={char.name}
               className="floating-char"
-              style={{ width: pos.size, height: pos.size }}
+              style={{ width: slot.size, height: slot.size }}
             />
             <div className="float-tooltip">{char.name}</div>
           </div>
