@@ -51,7 +51,6 @@
   z-index: 99999;
   font-size: 1.6rem;
   transform: translate(-50%, -50%) rotate(-45deg);
-  transition: transform 0.1s ease;
   filter: drop-shadow(0 0 6px rgba(0, 255, 180, 0.8));
 }
 
@@ -74,6 +73,7 @@
   text-align: center;
   z-index: 10;
   margin-bottom: 1rem;
+  position: relative;
 }
 
 .hero-title {
@@ -85,7 +85,8 @@
   letter-spacing: 4px;
   animation: glowPulse 3s ease-in-out infinite;
   cursor: pointer;
-  transition: letter-spacing 0.3s ease;
+  transition: letter-spacing 0.3s ease, text-shadow 0.3s ease;
+  user-select: none;
 }
 
 .hero-title:hover {
@@ -94,52 +95,36 @@
                0 0 100px rgba(0, 255, 180, 0.5);
 }
 
-.hero-subtitle {
-  color: #aaaaaa;
-  font-size: 1.1rem;
-  margin-top: 0.5rem;
-  letter-spacing: 2px;
-}
-
 @keyframes glowPulse {
   0%, 100% { text-shadow: 0 0 30px rgba(0,255,180,0.6), 0 0 60px rgba(0,255,180,0.3); }
   50%       { text-shadow: 0 0 50px rgba(0,255,180,0.9), 0 0 100px rgba(0,255,180,0.5); }
 }
 
-/* ── Personaje flotante ── */
-.floating-char {
+/* ── Wrapper flotante ── */
+.floating-wrapper {
   position: absolute;
+  cursor: none;
+  z-index: 10;
+}
+
+.floating-wrapper:hover {
+  z-index: 50;
+}
+
+/* ── Imagen flotante ── */
+.floating-char {
   border-radius: 50%;
   border: 2px solid #00ffb4;
   object-fit: cover;
+  display: block;
   box-shadow: 0 0 12px rgba(0, 255, 180, 0.5);
-  cursor: none;
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-  animation: floatMove var(--float-duration) ease-in-out infinite alternate;
 }
 
-.floating-char:hover {
-  transform: scale(1.3) !important;
+.floating-wrapper:hover .floating-char {
+  transform: scale(1.35);
   box-shadow: 0 0 30px rgba(0, 255, 180, 0.9);
   border-color: #ffffff;
-  z-index: 50;
-  animation-play-state: paused;
-}
-
-.floating-char.hovered {
-  animation-play-state: paused;
-  transform: scale(1.3);
-  box-shadow: 0 0 30px rgba(0, 255, 180, 0.9);
-  border-color: #ffffff;
-  z-index: 50;
-}
-
-@keyframes floatMove {
-  0%   { transform: translate(0px, 0px) rotate(0deg); }
-  25%  { transform: translate(var(--dx1), var(--dy1)) rotate(3deg); }
-  50%  { transform: translate(var(--dx2), var(--dy2)) rotate(-2deg); }
-  75%  { transform: translate(var(--dx3), var(--dy3)) rotate(2deg); }
-  100% { transform: translate(var(--dx4), var(--dy4)) rotate(-3deg); }
 }
 
 /* ── Tooltip flotante ── */
@@ -148,13 +133,13 @@
   bottom: -28px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0,0,0,0.85);
+  background: rgba(0, 0, 0, 0.85);
   color: #00ffb4;
   font-size: 0.65rem;
   white-space: nowrap;
   padding: 3px 8px;
   border-radius: 6px;
-  border: 1px solid rgba(0,255,180,0.3);
+  border: 1px solid rgba(0, 255, 180, 0.3);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s;
@@ -163,12 +148,6 @@
 
 .floating-wrapper:hover .float-tooltip {
   opacity: 1;
-}
-
-.floating-wrapper {
-  position: absolute;
-  cursor: none;
-  z-index: 10;
 }
 
 /* ── Fade in ── */
@@ -183,8 +162,25 @@
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .hero-title { font-size: 2.2rem; }
-  .hero-subtitle { font-size: 0.9rem; }
-  .rocket-cursor { display: none; }
-  .home-hero { cursor: default; }
+  .hero-title {
+    font-size: 2.2rem;
+  }
+
+  .rocket-cursor {
+    display: none;
+  }
+
+  .home-hero {
+    cursor: default;
+  }
+
+  .floating-wrapper {
+    cursor: default;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.8rem;
+  }
 }
