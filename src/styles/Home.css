@@ -44,7 +44,6 @@
   to { background-position: -10000px 5000px; }
 }
 
-/* ── Cursor cohete ── */
 .rocket-cursor {
   position: fixed;
   pointer-events: none;
@@ -54,7 +53,6 @@
   filter: drop-shadow(0 0 6px rgba(0, 255, 180, 0.8));
 }
 
-/* ── Rastro de humo ── */
 .smoke-particle {
   position: fixed;
   pointer-events: none;
@@ -68,7 +66,6 @@
   100% { opacity: 0; transform: scale(2.5) translateY(-10px); }
 }
 
-/* ── Texto hero ── */
 .hero-text {
   text-align: center;
   z-index: 10;
@@ -100,7 +97,6 @@
   50%       { text-shadow: 0 0 50px rgba(0,255,180,0.9), 0 0 100px rgba(0,255,180,0.5); }
 }
 
-/* ── Wrapper flotante ── */
 .floating-wrapper {
   position: absolute;
   cursor: none;
@@ -111,7 +107,6 @@
   z-index: 50;
 }
 
-/* ── Imagen flotante ── */
 .floating-char {
   border-radius: 50%;
   border: 2px solid #00ffb4;
@@ -127,7 +122,6 @@
   border-color: #ffffff;
 }
 
-/* ── Tooltip flotante ── */
 .float-tooltip {
   position: absolute;
   bottom: -28px;
@@ -150,7 +144,6 @@
   opacity: 1;
 }
 
-/* ── Fade in ── */
 .fade-in {
   animation: fadeIn 1s ease;
 }
@@ -160,7 +153,6 @@
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* ── Responsive ── */
 @media (max-width: 768px) {
   .hero-title {
     font-size: 2.2rem;

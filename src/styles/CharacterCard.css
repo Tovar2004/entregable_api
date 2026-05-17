@@ -11,7 +11,6 @@
               border-color 0.3s ease;
 }
 
-/* Brillo que barre la card de izquierda a derecha */
 .card::before {
   content: "";
   position: absolute;
@@ -30,7 +29,6 @@
   pointer-events: none;
 }
 
-/* Borde neón animado */
 .card::after {
   content: "";
   position: absolute;
@@ -64,7 +62,6 @@
   transition: transform 0.1s ease;
 }
 
-/* Imagen con zoom + tinte verde */
 .card-image {
   width: 100%;
   height: 220px;
@@ -78,7 +75,6 @@
   filter: brightness(1.1) saturate(1.2);
 }
 
-/* Overlay degradado sobre la imagen al hover */
 .card-image-wrapper {
   position: relative;
   overflow: hidden;

@@ -53,7 +53,6 @@ const Home = () => {
     fading:  false,
   });
 
-  // Cargar personajes
   useEffect(() => {
     const fetchAll = async () => {
       const res  = await fetch(`https://rickandmortyapi.com/api/character/${POOL.join(",")}`);
@@ -111,7 +110,6 @@ const Home = () => {
     return () => cancelAnimationFrame(rafId.current);
   }, [slots.length]);
 
-  // Rotar personajes cada 4s
   useEffect(() => {
     if (Object.keys(allChars).length === 0) return;
 
@@ -166,7 +164,6 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [allChars, selectedCharacter, hoveredId]);
 
-  // Cursor cohete
   const handleMouseMove = useCallback((e) => {
     setCursorPos({ x: e.clientX, y: e.clientY });
     const now = Date.now();
