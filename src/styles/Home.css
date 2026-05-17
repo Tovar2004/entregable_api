@@ -74,7 +74,6 @@
   text-align: center;
   z-index: 10;
   margin-bottom: 1rem;
-  pointer-events: none;
 }
 
 .hero-title {
@@ -85,6 +84,14 @@
                0 0 60px rgba(0, 255, 180, 0.3);
   letter-spacing: 4px;
   animation: glowPulse 3s ease-in-out infinite;
+  cursor: pointer;
+  transition: letter-spacing 0.3s ease;
+}
+
+.hero-title:hover {
+  letter-spacing: 8px;
+  text-shadow: 0 0 50px rgba(0, 255, 180, 0.9),
+               0 0 100px rgba(0, 255, 180, 0.5);
 }
 
 .hero-subtitle {
