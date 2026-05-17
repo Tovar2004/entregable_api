@@ -35,6 +35,8 @@ Aplicación web desarrollada en React que consume la API pública de [Rick and M
 ---
 
 ## 📁 Estructura del proyecto
+
+```
 src/
 ├── components/
 │   ├── CharacterCard.jsx     # Tarjeta de personaje
@@ -62,6 +64,7 @@ src/
 ├── App.jsx                   # Configuración de rutas
 ├── App.css                   # Estilos globales
 └── main.jsx                  # Punto de entrada
+```
 
 ---
 
@@ -95,7 +98,9 @@ npm run dev
 ```
 
 **5. Abre en tu navegador:**
+```
 http://localhost:5173
+```
 
 ---
 
