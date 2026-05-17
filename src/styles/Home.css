@@ -184,3 +184,9 @@
     font-size: 1.8rem;
   }
 }
+
+.floating-wrapper.is-hovered .floating-char {
+  transform: scale(1.35);
+  box-shadow: 0 0 30px rgba(0, 255, 180, 0.9);
+  border-color: #ffffff;
+}
